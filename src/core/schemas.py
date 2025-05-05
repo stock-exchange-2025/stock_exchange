@@ -1,19 +1,19 @@
-﻿from pydantic import BaseModel
+﻿from pydantic import BaseModel, constr, UUID4, Field
 
-from src.core.enums import Role
+from src.core.enums import UserRole
 
 
 class User(BaseModel):
-    id: str
+    id: UUID4
     name: str
-    role: Role
+    role: UserRole
     api_key: str
 
 
 class Instrument(BaseModel):
     name: str
-    ticker: str
+    ticker: constr(regex=r'^[A-Z]{2,10}$')
 
 
 class Ok(BaseModel):
-    success: bool = True
+    success: bool = Field(default=True, const=True)

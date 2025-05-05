@@ -1,9 +1,9 @@
-﻿from pydantic import BaseModel
+﻿from uuid import UUID
 
-from src.core.enums import Ticker
+from pydantic import BaseModel, Field
 
 
 class BalanceUpdateBody(BaseModel):
-    user_id: str
-    ticker: Ticker
-    amount: int
+    user_id: UUID
+    ticker: str = Field(example="MEMECOIN")
+    amount: int = Field(gt=0)

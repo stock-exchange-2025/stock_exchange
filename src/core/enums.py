@@ -1,13 +1,9 @@
 ﻿from enum import Enum
 
 
-class Role(str, Enum):
+class UserRole(str, Enum):
     user = "USER"
     admin = "ADMIN"
-
-
-class Ticker(str, Enum):
-    memecoin = "MEMECOIN"
 
 
 class ApiTags(str, Enum):
