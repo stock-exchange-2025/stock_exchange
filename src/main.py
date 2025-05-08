@@ -13,8 +13,9 @@ from starlette.responses import StreamingResponse, JSONResponse, Response
 from src.balance.router import router as balance_router
 from src.core.enums import ApiTags
 from src.order.router import router as order_router
-from src.public.router import router as public_router
-from src.admin.router import router as admin_router
+from src.transaction.router import router as transaction_router
+from src.user.router import router as user_router
+from src.instrument.router import router as instrument_router
 
 
 log = logging.getLogger(__name__)
@@ -58,10 +59,13 @@ app.add_middleware(
 app.add_middleware(ExceptionMiddleware)
 
 v1_router = APIRouter(prefix="/api/v1")
-v1_router.include_router(public_router, prefix="/public", tags=[ApiTags.PUBLIC])
-v1_router.include_router(balance_router, tags=[ApiTags.BALANCE])
-v1_router.include_router(order_router, tags=[ApiTags.ORDER])
-v1_router.include_router(admin_router, prefix="/admin", tags=[ApiTags.ADMIN])
+
+v1_router.include_router(balance_router)
+v1_router.include_router(instrument_router)
+v1_router.include_router(order_router)
+v1_router.include_router(transaction_router)
+v1_router.include_router(user_router)
+
 
 app.include_router(v1_router)
 
