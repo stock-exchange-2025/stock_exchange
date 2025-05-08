@@ -44,7 +44,7 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
             log.exception(e)
             response = JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"detail": [{"msg": "Unknown", "loc": ["Unknown"], "type": "Unknown"}]},
+                content={"detail": [{"msg": "An unexpected service error occurred", "loc": ["Unknown"], "type": "Unknown"}]},
             )
 
         return response
