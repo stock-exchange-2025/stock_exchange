@@ -1,5 +1,4 @@
-﻿from sqlalchemy import Column, String, Uuid, func, DateTime, Enum
-from sqlalchemy.orm import relationship
+﻿from sqlalchemy import Column, String, Uuid, func, DateTime, Enum, UniqueConstraint
 
 from src.core.database import Base
 from src.user.enums import UserRole
@@ -14,5 +13,7 @@ class User(Base):
     api_key = Column(String(512), nullable=False, unique=True)
     created_at = Column(DateTime, server_default=func.current_timestamp())
 
-    balances = relationship("Balance", back_populates="user", cascade="all, delete")
-    orders = relationship("Order", back_populates="user", cascade="all, delete")
+    __table_args__ = (
+        UniqueConstraint('username', name='uq_users_username'),
+        UniqueConstraint('api_key', name='uq_users_api_key')
+    )

@@ -1,5 +1,4 @@
-﻿from sqlalchemy import Column, Uuid, ForeignKey, DECIMAL, CheckConstraint, DateTime, func, Enum
-from sqlalchemy.orm import relationship
+﻿from sqlalchemy import Column, Uuid, ForeignKey, DECIMAL, DateTime, func, Enum, Index
 
 from src.core.database import Base
 from src.order.enums import Direction, OrderStatus, OrderType
@@ -20,11 +19,6 @@ class Order(Base):
     created_at = Column(DateTime, server_default=func.current_timestamp())
     updated_at = Column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
-    user = relationship("User", back_populates="orders")
-    instrument = relationship("Instrument", back_populates="orders")
-
     __table_args__ = (
-        CheckConstraint("quantity > 0", name="check_quantity_positive"),
-        CheckConstraint("filled_quantity >= 0 AND filled_quantity <= quantity", name="check_filled_quantity"),
-        CheckConstraint("(price > 0 AND order_type = 'limit') OR (order_type = 'market')", name="check_price"),
+        Index('ix_orders_user_id', 'user_id'),
     )

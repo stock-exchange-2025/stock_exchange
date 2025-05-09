@@ -1,5 +1,4 @@
-﻿from sqlalchemy import Column, Uuid, ForeignKey, DECIMAL, CheckConstraint, UniqueConstraint
-from sqlalchemy.orm import relationship
+﻿from sqlalchemy import Column, Uuid, ForeignKey, DECIMAL, UniqueConstraint, Index
 
 from src.core.database import Base
 
@@ -13,11 +12,7 @@ class Balance(Base):
     amount = Column(DECIMAL(20, 8), nullable=False, default=0.0)
     locked_amount = Column(DECIMAL(20, 8), nullable=False, default=0.0)
 
-    user = relationship("User", back_populates="balances")
-    instrument = relationship("Instrument", back_populates="balances")
-
     __table_args__ = (
-        CheckConstraint("amount >= 0", name="check_amount_positive"),
-        CheckConstraint("locked_amount >= 0", name="check_locked_amount_positive"),
-        UniqueConstraint('user_id', name='uq_user_balance')
+        UniqueConstraint('user_id', name='uq_user_balance'),
+        Index('ix_balances_user_id', 'user_id')
     )

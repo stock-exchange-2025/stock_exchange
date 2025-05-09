@@ -1,5 +1,4 @@
-﻿from sqlalchemy import Uuid, func, Column, DECIMAL, DateTime, CheckConstraint, ForeignKey
-from sqlalchemy.orm import relationship
+﻿from sqlalchemy import Uuid, func, Column, DECIMAL, DateTime, ForeignKey
 
 from src.core.database import Base
 
@@ -13,10 +12,3 @@ class Transaction(Base):
     price = Column(DECIMAL(20, 8), nullable=False)
     quantity = Column(DECIMAL(20, 8), nullable=False)
     executed_at = Column(DateTime, server_default=func.current_timestamp())
-
-    instrument = relationship("Instrument", back_populates="transactions")
-
-    __table_args__ = (
-        CheckConstraint("price > 0", name="check_price_positive"),
-        CheckConstraint("quantity > 0", name="check_quantity_positive"),
-    )

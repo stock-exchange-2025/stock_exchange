@@ -1,5 +1,7 @@
+import os
 from logging.config import fileConfig
 
+from dotenv import load_dotenv
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
@@ -7,15 +9,25 @@ from alembic import context
 
 from src.core.database import Base
 
+from src import config
+
+from src.user import models
 from src.balance import models
 from src.instrument import models
 from src.order import models
 from src.transaction import models
-from src.user import models
+
+load_dotenv()
+
+SQLALCHEMY_URL = config.SQLALCHEMY_DATABASE_URI
+if not SQLALCHEMY_URL:
+    raise RuntimeError("SQLALCHEMY_URL variable not set in .env")
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+config.set_main_option("sqlalchemy.url", SQLALCHEMY_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

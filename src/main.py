@@ -1,22 +1,20 @@
 ﻿import logging
-from typing import Any, Coroutine
 
 import uvicorn
 from fastapi import FastAPI, APIRouter, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from pydantic import ValidationError
+from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
-from starlette.responses import StreamingResponse, JSONResponse, Response
+from starlette.responses import JSONResponse
 
 from src.balance.router import router as balance_router
-from src.core.enums import ApiTags
+from src.core.database import engine
+from src.instrument.router import router as instrument_router
 from src.order.router import router as order_router
 from src.transaction.router import router as transaction_router
 from src.user.router import router as user_router
-from src.instrument.router import router as instrument_router
-
 
 log = logging.getLogger(__name__)
 
@@ -38,15 +36,38 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
             log.exception(e)
             response = JSONResponse(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                content={"detail": [{"msg": "Unknown", "loc": ["Unknown"], "type": "Unknown"}]},
+                content={
+                    "detail": [{
+                        "msg": str(e),
+                        "loc": ["Unknown"],
+                        "type": "value_error"
+                    }]
+                },
             )
         except Exception as e:
             log.exception(e)
             response = JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"detail": [{"msg": "An unexpected service error occurred", "loc": ["Unknown"], "type": "Unknown"}]},
+                content={
+                    "detail": [{
+                        "msg": "An unexpected service error occurred",
+                        "loc": ["Unknown"],
+                        "type": "server_error"
+                    }]
+                },
             )
 
+        return response
+
+
+class DBSessionMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        SessionLocal = Session(bind=engine)
+        try:
+            request.state.db = SessionLocal
+            response = await call_next(request)
+        finally:
+            SessionLocal.close()
         return response
 
 app.add_middleware(
@@ -57,6 +78,7 @@ app.add_middleware(
 )
 
 app.add_middleware(ExceptionMiddleware)
+app.add_middleware(DBSessionMiddleware)
 
 v1_router = APIRouter(prefix="/api/v1")
 
