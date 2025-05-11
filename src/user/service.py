@@ -4,6 +4,7 @@ from typing import Optional
 
 from fastapi import HTTPException
 from pydantic import UUID4
+from starlette.requests import Request
 
 from src.core.database import DbSession
 from src.user import utils
@@ -32,18 +33,17 @@ def register_new_user(*, user: NewUser, db_session: DbSession) -> UserDTO:
     return UserDTO(id=new_user.id, name=new_user.username, role=UserRole.user, api_key=api_key)
 
 
-def delete_user(*, user_id: UUID4, api_key: str | None, db_session: DbSession) -> UserDTO:
-    if api_key is None:
-        raise HTTPException(status_code=401, detail="Authorization header is missing")
+def delete_user(*, user_id: UUID4, request: Request, db_session: DbSession) -> UserDTO:
+    user = request.state.user
+    if not user:
+        raise HTTPException(status_code=500, detail="User not found in request state")
 
     existing_user = db_session.query(UserDAL).filter_by(id=user_id).first()
     if existing_user is None:
-        raise ValueError(f"User with id '{user_id}' doesn't exist")
+        raise HTTPException(status_code=400, detail=f"User with id '{user_id}' doesn't exist")
 
-    user_by_api_key = utils.get_user_by_api_key(api_key=api_key, db_session=db_session)
-
-    if existing_user.id != user_by_api_key.id and user_by_api_key.role == UserRole.user:
-        raise ValueError("You don't have permission to delete your account")
+    if existing_user.id != user.id and user.role == UserRole.user:
+        raise HTTPException(status_code=400, detail="You don't have permission to delete your account")
 
     db_session.delete(existing_user)
     db_session.commit()

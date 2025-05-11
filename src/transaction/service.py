@@ -1,7 +1,8 @@
 ﻿from typing import List
 
+from src.core.database import DbSession
 from src.transaction.schemas import Transaction
 
 
-async def get_transaction_history(ticker: str, limit: int = 0) -> List[Transaction]:
+def get_transaction_history(ticker: str, limit: int, db_session: DbSession) -> List[Transaction]:
     pass

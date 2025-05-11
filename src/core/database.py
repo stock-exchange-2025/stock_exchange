@@ -1,17 +1,17 @@
 ﻿import logging
-from typing import Annotated
 
-from fastapi import Depends
+from fastapi import HTTPException
 from sqlalchemy import create_engine, make_url
 from sqlalchemy.orm import Session, declarative_base
 from starlette.requests import Request
 
 from src import config
 
-
 log = logging.getLogger(__name__)
 
 Base = declarative_base()
+
+DbSession = Session
 
 def create_db_engine(connection_string: str):
     url = make_url(connection_string)
@@ -35,9 +35,7 @@ def create_db_engine(connection_string: str):
 engine = create_db_engine(config.SQLALCHEMY_DATABASE_URI)
 Base.metadata.create_all(engine)
 
-def get_db(request: Request) -> Session:
-    session = request.state.db
-    return session
-
-
-DbSession = Annotated[Session, Depends(get_db)]
+def get_db(request: Request) -> DbSession:
+    if not hasattr(request.state, "db"):
+        raise HTTPException(status_code=500, detail="Database session not initialized")
+    return request.state.db
