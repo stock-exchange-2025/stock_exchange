@@ -1,6 +1,6 @@
-﻿from typing import Optional, List
+﻿from typing import List
 
-from fastapi import APIRouter, Header, Depends
+from fastapi import APIRouter, Depends
 from starlette.requests import Request
 
 from src.core.database import DbSession, get_db

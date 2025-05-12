@@ -1,13 +1,11 @@
 ﻿import uuid
 from datetime import datetime
-from typing import Optional
 
 from fastapi import HTTPException
 from pydantic import UUID4
 from starlette.requests import Request
 
 from src.core.database import DbSession
-from src.user import utils
 from src.user.enums import UserRole
 from src.user.models import User as UserDAL
 from src.user.schemas import NewUser
@@ -30,20 +28,23 @@ def register_new_user(*, user: NewUser, db_session: DbSession) -> UserDTO:
 
     db_session.add(new_user)
     db_session.commit()
+
     return UserDTO(id=new_user.id, name=new_user.username, role=UserRole.user, api_key=api_key)
 
 
 def delete_user(*, user_id: UUID4, request: Request, db_session: DbSession) -> UserDTO:
     user = request.state.user
+
     if not user:
-        raise HTTPException(status_code=500, detail="User not found in request state")
+        raise HTTPException(status_code=500, detail="User not found.")
 
     existing_user = db_session.query(UserDAL).filter_by(id=user_id).first()
-    if existing_user is None:
-        raise HTTPException(status_code=400, detail=f"User with id '{user_id}' doesn't exist")
 
-    if existing_user.id != user.id and user.role == UserRole.user:
-        raise HTTPException(status_code=400, detail="You don't have permission to delete your account")
+    if existing_user is None:
+        raise HTTPException(status_code=400, detail=f"User with id '{user_id}' doesn't exist.")
+
+    if existing_user.id != user.id and user.role != UserRole.admin:
+        raise HTTPException(status_code=400, detail="You don't have permission to delete specified user.")
 
     db_session.delete(existing_user)
     db_session.commit()

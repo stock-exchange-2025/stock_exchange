@@ -6,11 +6,10 @@ from starlette.datastructures import Secret
 
 
 def get_env_tags(tag_list: list[str]) -> dict:
-    """Create a dictionary of available env tags."""
     tags = {}
-    for t in tag_list:
-        tag_key, env_key = t.split(":")
 
+    for tag in tag_list:
+        tag_key, env_key = tag.split(":")
         env_value = os.environ.get(env_key)
 
         if env_value:
@@ -33,8 +32,6 @@ DATABASE_PORT = config("DATABASE_PORT", default="5432")
 SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{_DATABASE_CREDENTIAL_USER}:{_QUOTED_DATABASE_PASSWORD}@{DATABASE_HOSTNAME}:{DATABASE_PORT}/{DATABASE_NAME}"
 
 DATABASE_ENGINE_MAX_OVERFLOW = config("DATABASE_ENGINE_MAX_OVERFLOW", cast=int, default=10)
-# Deal with DB disconnects
-# https://docs.sqlalchemy.org/en/20/core/pooling.html#pool-disconnects
 DATABASE_ENGINE_POOL_PING = config("DATABASE_ENGINE_POOL_PING", default=False)
 DATABASE_ENGINE_POOL_RECYCLE = config("DATABASE_ENGINE_POOL_RECYCLE", cast=int, default=3600)
 DATABASE_ENGINE_POOL_SIZE = config("DATABASE_ENGINE_POOL_SIZE", cast=int, default=20)
