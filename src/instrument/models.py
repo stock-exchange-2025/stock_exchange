@@ -1,4 +1,4 @@
-﻿import uuid
+import uuid
 
 from sqlalchemy import String, Index
 from sqlalchemy.dialects.postgresql import UUID

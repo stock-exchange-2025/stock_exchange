@@ -1,28 +1,30 @@
-﻿from typing import List
+from typing import List
 
+from fastapi import Depends
 from pydantic import UUID4
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
-from src.core.database import DbSession
 from src.core.schemas import Ok
+from src.dependencies import get_session
 from src.order.schemas import LimitOrderBody, CreateOrderResponse, LimitOrder, MarketOrder, L2OrderBook
 
 
-def create_order(*, body: LimitOrderBody, request: Request, db_session: DbSession) -> CreateOrderResponse:
+async def create_order(*, body: LimitOrderBody, request: Request, db_session: AsyncSession = Depends(get_session)) -> CreateOrderResponse:
     pass
 
 
-def get_orders(*, request: Request, db_session: DbSession) -> List[LimitOrder | MarketOrder]:
+async def get_orders(*, request: Request, db_session: AsyncSession = Depends(get_session)) -> List[LimitOrder | MarketOrder]:
     pass
 
 
-def get_order(*, order_id: UUID4, request: Request, db_session: DbSession) -> LimitOrder | MarketOrder:
+async def get_order(*, order_id: UUID4, request: Request, db_session: AsyncSession = Depends(get_session)) -> LimitOrder | MarketOrder:
     pass
 
 
-def get_orderbook(*, ticker: str, limit: int, db_session: DbSession) -> L2OrderBook:
+async def get_orderbook(*, ticker: str, limit: int, db_session: AsyncSession = Depends(get_session)) -> L2OrderBook:
     pass
 
 
-def cancel_order(*, order_id: UUID4, request: Request, db_session: DbSession) -> Ok:
+async def cancel_order(*, order_id: UUID4, request: Request, db_session: AsyncSession = Depends(get_session)) -> Ok:
     pass

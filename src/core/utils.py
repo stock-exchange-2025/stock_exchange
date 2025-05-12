@@ -1,4 +1,4 @@
-﻿from fastapi import Security, HTTPException
+from fastapi import Security, HTTPException
 from fastapi.security import APIKeyHeader
 
 from src.user.utils import TOKEN_PREFIX

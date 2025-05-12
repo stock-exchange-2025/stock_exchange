@@ -1,7 +1,8 @@
-﻿import logging
+import logging
 
 from fastapi import HTTPException
-from sqlalchemy import create_engine, make_url
+from sqlalchemy import make_url
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import Session, declarative_base
 from starlette.requests import Request
 
@@ -21,11 +22,11 @@ def create_db_engine(connection_string: str):
         "pool_pre_ping": config.DATABASE_ENGINE_POOL_PING,
     }
 
-    return create_engine(make_url(connection_string), **timeout_kwargs)
+    return create_async_engine(make_url(connection_string), **timeout_kwargs)
 
 
-engine = create_db_engine(config.SQLALCHEMY_DATABASE_URI)
-Base.metadata.create_all(engine)
+db_engine = create_db_engine(config.SQLALCHEMY_DATABASE_URI)
+
 
 def get_db(request: Request) -> DbSession:
     if not hasattr(request.state, "db"):

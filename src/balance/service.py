@@ -1,17 +1,19 @@
-﻿from starlette.requests import Request
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.requests import Request
 
 from src.balance.schemas import BalanceResponse, BalanceUpdateBody
-from src.core.database import DbSession
 from src.core.schemas import Ok
+from src.dependencies import get_session
 
 
-def get_balances(*, request: Request, db_session: DbSession) -> BalanceResponse:
+async def get_balances(*, request: Request, db_session: AsyncSession = Depends(get_session)) -> BalanceResponse:
     pass
 
 
-def process_deposit(*, operation_info: BalanceUpdateBody, request: Request, db_session: DbSession) -> Ok:
+async def create_deposit(*, operation_info: BalanceUpdateBody, request: Request, db_session: AsyncSession = Depends(get_session)) -> Ok:
     pass
 
 
-def withdraw(*, operation_info: BalanceUpdateBody, request: Request, db_session: DbSession) -> Ok:
+async def create_withdraw(*, operation_info: BalanceUpdateBody, request: Request, db_session: AsyncSession = Depends(get_session)) -> Ok:
     pass

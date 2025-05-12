@@ -1,1 +1,1 @@
-﻿from .models import Balance
+from .models import Balance

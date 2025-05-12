@@ -1,4 +1,4 @@
-﻿import hashlib
+import hashlib
 import hmac
 import uuid
 
@@ -6,9 +6,9 @@ from typing import Tuple
 
 from fastapi import HTTPException
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src import config
-from src.core.database import DbSession
 from src.user.models import User as UserDAL
 
 TOKEN_PREFIX = "TOKEN"
@@ -32,7 +32,7 @@ def generate_api_key() -> Tuple[str, str]:
     return key_id, full_api_key
 
 
-def get_user(api_key: str, db_session: DbSession) -> UserDAL:
+async def get_user(api_key: str, db_session: AsyncSession) -> UserDAL:
     try:
         _, key_part = api_key.split(" ", 1)
         key_id, signature = key_part.split(".")
@@ -45,4 +45,4 @@ def get_user(api_key: str, db_session: DbSession) -> UserDAL:
     if not hmac.compare_digest(signature, expected_sig):
         raise HTTPException(status_code=401, detail="Invalid API key.")
 
-    return db_session.execute(select(UserDAL).filter_by(api_key=key_id)).scalar_one_or_none()
+    return (await db_session.execute(select(UserDAL).filter_by(api_key=key_id))).scalar_one_or_none()

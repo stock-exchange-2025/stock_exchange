@@ -1,23 +1,21 @@
-﻿import logging
+import logging
 
 import uvicorn
 from fastapi import FastAPI, APIRouter, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
-from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from src.balance.router import router as balance_router
-from src.core.database import engine
 from src.core.utils import AUTHORIZATION_HEADER_NAME
+from src.dependencies import session_factory
 from src.instrument.router import router as instrument_router
 from src.order.router import router as order_router
 from src.transaction.router import router as transaction_router
 from src.user.router import router as user_router
 from src.user.utils import get_user
-
 
 log = logging.getLogger(__name__)
 app = FastAPI(debug=True)
@@ -32,18 +30,19 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         api_key = request.headers.get(AUTHORIZATION_HEADER_NAME)
 
         if not api_key:
-            raise HTTPException(status_code=401, detail=f"{AUTHORIZATION_HEADER_NAME} header is missing")
+            raise HTTPException(status_code=401, detail=f"{AUTHORIZATION_HEADER_NAME} header is missing.")
 
         try:
-            user = get_user(api_key=api_key, db_session=request.state.db)
+            async with session_factory() as db_session:
+                user = await get_user(api_key=api_key, db_session=db_session)
 
-            if not user:
-                raise HTTPException(status_code=401, detail="Invalid API key")
+                if not user:
+                    raise HTTPException(status_code=401, detail="Invalid API key.")
 
-            request.state.user = user
-            request.state.api_key = api_key
+                request.state.user = user
+                request.state.api_key = api_key
         except Exception as e:
-            raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}")
+            raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}.")
 
         return await call_next(request)
 
@@ -86,19 +85,6 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
         return response
 
 
-class DBSessionMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        session = Session(bind=engine)
-
-        try:
-            request.state.db = session
-            response = await call_next(request)
-        finally:
-            session.close()
-
-        return response
-
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -108,7 +94,6 @@ app.add_middleware(
 
 app.add_middleware(ExceptionMiddleware)
 app.add_middleware(AuthenticationMiddleware)
-app.add_middleware(DBSessionMiddleware)
 
 v1_router = APIRouter(prefix="/api/v1")
 
@@ -119,6 +104,7 @@ v1_router.include_router(transaction_router)
 v1_router.include_router(user_router)
 
 app.include_router(v1_router)
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="localhost", port=8000, reload=True)
