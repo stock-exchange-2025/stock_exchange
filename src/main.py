@@ -16,7 +16,7 @@ from src.instrument.router import router as instrument_router
 from src.order.router import router as order_router
 from src.transaction.router import router as transaction_router
 from src.user.router import router as user_router
-from src.user.utils import get_user_by_api_key
+from src.user.utils import get_user
 
 
 log = logging.getLogger(__name__)
@@ -35,9 +35,11 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
             raise HTTPException(status_code=401, detail=f"{AUTHORIZATION_HEADER_NAME} header is missing")
 
         try:
-            user = get_user_by_api_key(api_key=api_key, db_session=request.state.db)
+            user = get_user(api_key=api_key, db_session=request.state.db)
+
             if not user:
                 raise HTTPException(status_code=401, detail="Invalid API key")
+
             request.state.user = user
             request.state.api_key = api_key
         except Exception as e:

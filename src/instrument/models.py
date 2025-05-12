@@ -1,12 +1,19 @@
-﻿from sqlalchemy import Column, Uuid, String, Index
+﻿import uuid
+
+from sqlalchemy import String, Index
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column
+
 from src.core.database import Base
 
 
 class Instrument(Base):
     __tablename__ = "instruments"
 
-    id = Column(Uuid, primary_key=True)
-    ticker = Column(String(20), nullable=False, unique=True)
-    name = Column(String(100), nullable=False)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    ticker: Mapped[str] = mapped_column(String(20), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    __table_args__ = (Index('ix_instruments_ticker', 'ticker'))
+    __table_args__ = (
+        Index("ix_instruments_ticker", "ticker")
+    )
