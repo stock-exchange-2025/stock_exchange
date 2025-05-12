@@ -3,4 +3,4 @@
 
 class Instrument(BaseModel):
     name: str
-    ticker: constr(regex=r'^[A-Z]{2,10}$')
+    ticker: constr(pattern=r'^[A-Z]{2,10}$')

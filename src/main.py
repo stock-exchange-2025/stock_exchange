@@ -20,7 +20,6 @@ from src.user.utils import get_user_by_api_key
 
 
 log = logging.getLogger(__name__)
-
 app = FastAPI(debug=True)
 
 
@@ -31,6 +30,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
             return response
 
         api_key = request.headers.get(AUTHORIZATION_HEADER_NAME)
+
         if not api_key:
             raise HTTPException(status_code=401, detail=f"{AUTHORIZATION_HEADER_NAME} header is missing")
 
@@ -43,14 +43,11 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}")
 
-        response = await call_next(request)
-        return response
+        return await call_next(request)
 
 
 class ExceptionMiddleware(BaseHTTPMiddleware):
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> JSONResponse:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> JSONResponse:
         try:
             response = await call_next(request)
         except ValidationError as e:
@@ -89,13 +86,16 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
 
 class DBSessionMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        SessionLocal = Session(bind=engine)
+        session = Session(bind=engine)
+
         try:
-            request.state.db = SessionLocal
+            request.state.db = session
             response = await call_next(request)
         finally:
-            SessionLocal.close()
+            session.close()
+
         return response
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -116,13 +116,7 @@ v1_router.include_router(order_router)
 v1_router.include_router(transaction_router)
 v1_router.include_router(user_router)
 
-
 app.include_router(v1_router)
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "main:app",
-        host="localhost",
-        port=8000,
-        reload=True
-    )
+    uvicorn.run("main:app", host="localhost", port=8000, reload=True)

@@ -1,11 +1,12 @@
 ﻿from typing import Dict
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel
 
 
-class BalanceResponse(BaseModel):
-    __root__: Dict[str, int]
+class BalanceResponse(RootModel[Dict[str, int]]):
+    pass
+
 
 class BalanceUpdateBody(BaseModel):
     user_id: UUID

@@ -1,5 +1,7 @@
-﻿from pydantic import BaseModel, Field
+﻿from typing import Literal
+
+from pydantic import BaseModel
 
 
 class Ok(BaseModel):
-    success: bool = Field(default=True, const=True)
+    success: Literal[True] = True
