@@ -4,7 +4,7 @@ import uvicorn
 from fastapi import FastAPI, APIRouter, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.middleware.base import RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
@@ -21,68 +21,67 @@ log = logging.getLogger(__name__)
 app = FastAPI(debug=True)
 
 
-class AuthenticationMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint):
-        if request.url.path.startswith("/api/v1/public") or request.url.path in ["/docs", "/openapi.json", "/"]:
-            response = await call_next(request)
-            return response
+@app.middleware("http")
+async def auth_user(request: Request, call_next: RequestResponseEndpoint):
+    if request.url.path.startswith("/api/v1/public") or request.url.path in ["/docs", "/openapi.json", "/"]:
+        return await call_next(request)
 
-        api_key = request.headers.get(AUTHORIZATION_HEADER_NAME)
+    api_key = request.headers.get(AUTHORIZATION_HEADER_NAME)
 
-        if not api_key:
-            raise HTTPException(status_code=401, detail=f"{AUTHORIZATION_HEADER_NAME} header is missing.")
+    if not api_key:
+        raise HTTPException(status_code=401, detail=f"{AUTHORIZATION_HEADER_NAME} header is missing.")
 
+    async with session_factory() as db_session:
         try:
-            async with session_factory() as db_session:
-                user = await get_user(api_key=api_key, db_session=db_session)
-
-                if not user:
-                    raise HTTPException(status_code=401, detail="Invalid API key.")
-
-                request.state.user = user
-                request.state.api_key = api_key
+            user = await get_user(api_key=api_key, db_session=db_session)
         except Exception as e:
             raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}.")
 
-        return await call_next(request)
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid API key.")
+
+        request.state.user = user
+        request.state.api_key = api_key
+
+    return await call_next(request)
 
 
-class ExceptionMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> JSONResponse:
-        try:
-            response = await call_next(request)
-        except ValidationError as e:
-            log.exception(e)
-            response = JSONResponse(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                content={"detail": e.errors()}
-            )
-        except ValueError as e:
-            log.exception(e)
-            response = JSONResponse(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                content={
-                    "detail": [{
-                        "msg": str(e),
-                        "loc": ["Unknown"],
-                        "type": "value_error"
-                    }]
-                },
-            )
-        except Exception as e:
-            log.exception(e)
-            response = JSONResponse(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={
-                    "detail": [{
-                        "msg": "An unexpected service error occurred",
-                        "loc": ["Unknown"],
-                        "type": "server_error"
-                    }]
-                },
-            )
+@app.middleware("http")
+async def catch_exception(request: Request, call_next: RequestResponseEndpoint) -> JSONResponse:
+    try:
+        response = await call_next(request)
+    except ValidationError as e:
+        log.exception(e)
+        response = JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content={"detail": e.errors()}
+        )
+    except ValueError as e:
+        log.exception(e)
+        response = JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content={
+                "detail": [{
+                    "msg": str(e),
+                    "loc": ["Unknown"],
+                    "type": "value_error"
+                }]
+            },
+        )
+    except Exception as e:
+        log.exception(e)
+        response = JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "detail": [{
+                    "msg": "An unexpected service error occurred",
+                    "loc": ["Unknown"],
+                    "type": "server_error"
+                }]
+            },
+        )
 
-        return response
+    return response
 
 
 app.add_middleware(
@@ -91,9 +90,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.add_middleware(ExceptionMiddleware)
-app.add_middleware(AuthenticationMiddleware)
 
 v1_router = APIRouter(prefix="/api/v1")
 

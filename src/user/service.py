@@ -41,7 +41,7 @@ async def delete_user(*, user_id: UUID4, request: Request, db_session: AsyncSess
     if not user:
         raise HTTPException(status_code=500, detail="User not found.")
 
-    existing_user = (await db_session.execute(select(UserDAL).where(UserDAL.username == user.name))).scalar_one_or_none()
+    existing_user = (await db_session.execute(select(UserDAL).where(UserDAL.id == user_id))).scalar_one_or_none()
 
     if existing_user is None:
         raise HTTPException(status_code=400, detail=f"User with id '{user_id}' doesn't exist.")
