@@ -19,5 +19,5 @@ class User(Base):
 
     __table_args__ = (
         UniqueConstraint("username", name="uq_users_username"),
-        UniqueConstraint("api_key", name="uq_users_api_key")
+        UniqueConstraint("api_key", name="uq_users_api_key"),
     )

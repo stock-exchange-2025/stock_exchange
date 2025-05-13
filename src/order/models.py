@@ -24,5 +24,5 @@ class Order(Base):
     updated_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
     __table_args__ = (
-        Index("ix_orders_user_id", "user_id")
+        Index("ix_orders_user_id", "user_id"),
     )

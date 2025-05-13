@@ -18,5 +18,5 @@ class Balance(Base):
 
     __table_args__ = (
         UniqueConstraint("user_id", name="uq_user_balance"),
-        Index("ix_balances_user_id", "user_id")
+        Index("ix_balances_user_id", "user_id"),
     )

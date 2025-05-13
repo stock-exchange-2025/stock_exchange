@@ -15,5 +15,5 @@ class Instrument(Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
 
     __table_args__ = (
-        Index("ix_instruments_ticker", "ticker")
+        Index("ix_instruments_ticker", "ticker"),
     )
