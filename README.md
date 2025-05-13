@@ -1,7 +1,7 @@
 # Quick start
 
-## Накатывание миграций на базу данных
-`alembic upgrade head`
+## Run migrations
+Execute `alembic upgrade head` in project root (`/stock-exchange`)
 
 ## Environment Configuration
 ### Security
@@ -13,4 +13,4 @@ DATABASE_CREDENTIALS=username:password
 
 DATABASE_NAME=your_db_name
 
-DATABASE_PORT=5432
+DATABASE_PORT=your_db_port
