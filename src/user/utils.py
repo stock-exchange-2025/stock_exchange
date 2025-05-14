@@ -7,6 +7,7 @@ from typing import Tuple
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.status import HTTP_401_UNAUTHORIZED
 
 from src import config
 from src.user.models import User as UserDAL
@@ -37,12 +38,12 @@ async def get_user(api_key: str, db_session: AsyncSession) -> UserDAL:
         _, key_part = api_key.split(" ", 1)
         key_id, signature = key_part.split(".")
     except ValueError:
-        raise HTTPException(status_code=401, detail="Invalid API key.")
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Invalid API key.")
 
     secret = get_secret_key()
     expected_sig = hmac.new(str(secret).encode(), key_id.encode(), hashlib.sha256).hexdigest()
 
     if not hmac.compare_digest(signature, expected_sig):
-        raise HTTPException(status_code=401, detail="Invalid API key.")
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Invalid API key.")
 
     return (await db_session.execute(select(UserDAL).filter_by(api_key=key_id))).scalar_one_or_none()

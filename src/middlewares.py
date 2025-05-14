@@ -4,6 +4,7 @@ from fastapi import Request, status, HTTPException
 from pydantic import ValidationError
 from starlette.middleware.base import RequestResponseEndpoint
 from starlette.responses import JSONResponse
+from starlette.status import HTTP_401_UNAUTHORIZED
 
 from src.core.utils import AUTHORIZATION_HEADER_NAME
 from src.dependencies import session_factory
@@ -19,16 +20,16 @@ async def auth_user(request: Request, call_next: RequestResponseEndpoint):
     api_key = request.headers.get(AUTHORIZATION_HEADER_NAME)
 
     if not api_key:
-        raise HTTPException(status_code=401, detail=f"{AUTHORIZATION_HEADER_NAME} header is missing.")
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail=f"{AUTHORIZATION_HEADER_NAME} header is missing.")
 
     async with session_factory() as db_session:
         try:
             user = await get_user(api_key=api_key, db_session=db_session)
         except Exception as e:
-            raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}.")
+            raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail=f"Authentication failed: {str(e)}.")
 
         if not user:
-            raise HTTPException(status_code=401, detail="Invalid API key.")
+            raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Invalid API key.")
 
         request.state.user = user
         request.state.api_key = api_key

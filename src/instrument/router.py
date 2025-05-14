@@ -14,8 +14,8 @@ router = APIRouter()
 
 
 @router.post("/admin/instrument", tags=[ApiTags.ADMIN], response_model=Ok)
-async def add_instrument(add_instrument_request: Instrument, request: Request = None, db_session: AsyncSession = Depends(get_session)):
-    return await service.add_instrument(add_instrument_request=add_instrument_request, request=request, db_session=db_session)
+async def add_instrument(add_instrument_request: Instrument, db_session: AsyncSession = Depends(get_session)):
+    return await service.create_instrument(add_instrument_request=add_instrument_request, db_session=db_session)
 
 
 @router.get("/public/instrument", tags=[ApiTags.PUBLIC], response_model=List[Instrument])

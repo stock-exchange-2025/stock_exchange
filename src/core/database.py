@@ -1,10 +1,8 @@
 import logging
 
-from fastapi import HTTPException
 from sqlalchemy import make_url
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import Session, declarative_base
-from starlette.requests import Request
 
 from src import config
 
@@ -26,10 +24,3 @@ def create_db_engine(connection_string: str):
 
 
 db_engine = create_db_engine(config.SQLALCHEMY_DATABASE_URI)
-
-
-def get_db(request: Request) -> DbSession:
-    if not hasattr(request.state, "db"):
-        raise HTTPException(status_code=500, detail="Database session is not initialized.")
-
-    return request.state.db

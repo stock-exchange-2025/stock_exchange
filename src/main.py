@@ -4,7 +4,7 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
 from middlewares import auth_user, catch_exception
-from src.admin.router import router as admin_router
+
 from src.balance.router import router as balance_router
 from src.instrument.router import router as instrument_router
 from src.order.router import router as order_router
@@ -19,7 +19,6 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 v1_router = APIRouter(prefix="/api/v1")
 
-v1_router.include_router(admin_router)
 v1_router.include_router(balance_router)
 v1_router.include_router(instrument_router)
 v1_router.include_router(order_router)
