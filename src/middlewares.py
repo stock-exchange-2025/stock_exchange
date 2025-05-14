@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 
 async def auth_user(request: Request, call_next: RequestResponseEndpoint):
-    if request.url.path.startswith("/api/v1/public") or request.url.path in ["/docs", "/openapi.json", "/"]:
+    if request.url.path.startswith("/api/v1/public") or request.url.path in ["/docs", "/openapi.json", "/favicon.ico", "/"]:
         return await call_next(request)
 
     api_key = request.headers.get(AUTHORIZATION_HEADER_NAME)
@@ -45,6 +45,12 @@ async def catch_exception(request: Request, call_next: RequestResponseEndpoint) 
         response = JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={"detail": e.errors()}
+        )
+    except HTTPException as e:
+        log.exception(e)
+        response = JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content={"detail": str(e)}
         )
     except ValueError as e:
         log.exception(e)
