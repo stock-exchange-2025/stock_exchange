@@ -17,6 +17,6 @@ class Balance(Base):
     locked_amount: Mapped[float] = mapped_column(DECIMAL(20, 8), nullable=False, default=0.0)
 
     __table_args__ = (
-        UniqueConstraint("user_id", name="uq_user_balance"),
+        UniqueConstraint("user_id", "instrument_id", name="uq_user_instrument_balance"),
         Index("ix_balances_user_id", "user_id"),
     )

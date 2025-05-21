@@ -9,7 +9,7 @@ from src.order.enums import Direction, OrderStatus
 class LimitOrderBody(BaseModel):
     direction: Direction
     ticker: str
-    qty: float = Field(ge=1)
+    qty: int = Field(ge=1)
     price: float = Field(gt=0)
 
 
