@@ -1,0 +1,1 @@
+﻿DEFAULT_TICKER = "RUB"
