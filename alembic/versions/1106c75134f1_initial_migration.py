@@ -1,8 +1,8 @@
-"""Initial migration.
+"""Initial migration
 
-Revision ID: e883e5434a16
+Revision ID: 1106c75134f1
 Revises: 
-Create Date: 2025-05-13 17:50:45.227774
+Create Date: 2025-05-21 10:36:37.476603
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'e883e5434a16'
+revision: str = '1106c75134f1'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -25,6 +25,7 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('ticker', sa.String(length=20), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('ticker')
     )
@@ -50,7 +51,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['instrument_id'], ['instruments.id'], ondelete='RESTRICT'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('user_id', name='uq_user_balance')
+    sa.UniqueConstraint('user_id', 'instrument_id', name='uq_user_instrument_balance')
     )
     op.create_index('ix_balances_user_id', 'balances', ['user_id'], unique=False)
     op.create_table('orders',
