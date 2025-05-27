@@ -219,3 +219,10 @@ resource "yandex_kubernetes_node_group" "node-group" {
         }
     }
 }
+
+resource "yandex_storage_bucket" "stock-exchange-bucket" {
+    bucket     = var.s3_bucket
+    access_key = var.s3_access_key
+    secret_key = var.s3_secret_key
+    acl        = "private"
+}

@@ -19,3 +19,18 @@ variable "pg_password" {
     type        = string
     sensitive   = true
 }
+
+variable "s3_access_key" {
+    description = "Object storage access key"
+    type = string 
+}
+
+variable "s3_secret_key" {
+    description = "Object storage secret key"
+    type = string 
+}
+
+variable "s3_bucket" {
+    description = "Object storage bucket"
+    type = string 
+}
