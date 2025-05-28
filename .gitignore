@@ -4,6 +4,7 @@
 .vscode
 pycache
 .pytest_cache
+*.pyc
 parser_products/funko
 .env
 app/zphoto
