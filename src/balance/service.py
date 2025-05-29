@@ -132,4 +132,4 @@ async def export_trades(*, request: Request) -> Ok:
     s3.put_object(Bucket=config.S3_BUCKET, Key="trades.csv", Body=csv_file.getvalue())
     async with httpx.AsyncClient() as client:
         await client.post(config.CLOUD_FUNCTION_URL)
-    return {"message": "Сделки экспортированы и уведомление отправлено"}
+    return Ok(success=True)

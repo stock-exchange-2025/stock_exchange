@@ -73,6 +73,14 @@ resource "yandex_vpc_security_group" "k8s" {
     port           = 443
   }
 
+  ingress {
+    description    = "The rule allows ingoing traffic for NodePorts."
+    protocol       = "TCP"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    from_port      = 30000
+    to_port        = 32767
+  }
+
   egress {
     description    = "The rule allows all outgoing traffic. Nodes can connect to Yandex Container Registry, Object Storage, Docker Hub, and more."
     protocol       = "ANY"
@@ -152,6 +160,15 @@ resource "yandex_resourcemanager_folder_iam_binding" "vpc-public-admin" {
 resource "yandex_resourcemanager_folder_iam_binding" "images-puller" {
     folder_id = var.folder_id
     role      = "container-registry.images.puller"
+
+    members = [
+        "serviceAccount:${yandex_iam_service_account.k8s-sa.id}"
+    ]
+}
+
+resource "yandex_resourcemanager_folder_iam_binding" "load-balancer-admin" {
+    folder_id = var.folder_id
+    role      = "load-balancer.admin"
 
     members = [
         "serviceAccount:${yandex_iam_service_account.k8s-sa.id}"
