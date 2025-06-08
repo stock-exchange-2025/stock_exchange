@@ -7,7 +7,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: development
+    environment: stock_exchange
     steps:
       - uses: actions/checkout@v4
       - name: Deploy to VM
