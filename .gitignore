@@ -14,3 +14,5 @@ fastapi-env*
 venv
 terraform/.terraform*
 terraform/terraform.tfstate*
+.env.k8s
+postgres-data/

@@ -39,7 +39,7 @@ DATABASE_ENGINE_POOL_TIMEOUT = config("DATABASE_ENGINE_POOL_TIMEOUT", cast=int, 
 
 SECRET_KEY = config("SECRET_KEY", cast=Secret)
 
-S3_ACCESS_KEY = config("S3_ACCESS_KEY")
-S3_SECRET_KEY = config("S3_SECRET_KEY")
-S3_BUCKET = config("S3_BUCKET")
-CLOUD_FUNCTION_URL = config("CLOUD_FUNCTION_URL")
+S3_ACCESS_KEY = config("S3_ACCESS_KEY", default="")
+S3_SECRET_KEY = config("S3_SECRET_KEY", default="")
+S3_BUCKET = config("S3_BUCKET", default="")
+CLOUD_FUNCTION_URL = config("CLOUD_FUNCTION_URL", default="")

@@ -1,6 +1,10 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
 WORKDIR /app
 COPY requirements/requirements.txt .
 RUN pip install -r requirements.txt
 COPY src/ ./src/
+COPY alembic/ ./alembic/
+COPY alembic.ini .
+COPY .env .
+CMD ["alembic", "upgrade", "head"]
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
