@@ -4,9 +4,15 @@
 .vscode
 pycache
 .pytest_cache
+*.pyc
 parser_products/funko
 .env
 app/zphoto
 app/prods.json
 app/prods_updated.json
 fastapi-env*
+venv
+terraform/.terraform*
+terraform/terraform.tfstate*
+.env.k8s
+postgres-data/

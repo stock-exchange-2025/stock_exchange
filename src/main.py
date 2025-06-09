@@ -3,7 +3,7 @@ import uvicorn
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
-from middlewares import auth_user, catch_exception
+from src.middlewares import auth_user, catch_exception
 
 from src.balance.router import router as balance_router
 from src.instrument.router import router as instrument_router

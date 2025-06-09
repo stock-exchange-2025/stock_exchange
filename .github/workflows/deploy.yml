@@ -1,0 +1,26 @@
+name: Build and Deploy
+on:
+  push:
+    branches:
+      - main
+      - deploy
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: stock_exchange
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/stock_exchange
+            git remote set-url origin https://${{ secrets.GIT_TOKEN }}@github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}.git
+            git pull origin ${{ github.ref_name }}
+            git remote set-url origin https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}.git
+            export $(grep -v '^#' .env | xargs)
+            docker-compose down
+            docker-compose up --build -d

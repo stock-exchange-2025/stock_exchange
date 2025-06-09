@@ -24,3 +24,8 @@ async def process_deposit(balance_update_request: BalanceUpdateBody, request: Re
 @router.post("/admin/balance/withdraw", tags=[ApiTags.ADMIN, ApiTags.BALANCE], response_model=Ok)
 async def process_withdraw(balance_update_request: BalanceUpdateBody, request: Request = None, db_session: AsyncSession = Depends(get_session)):
     return await service.create_withdraw(operation_info=balance_update_request, request=request, db_session=db_session)
+
+
+@router.get("/export-trades", tags=[ApiTags.BALANCE], response_model=Ok)
+async def export_trades(request: Request = None):
+    return await service.export_trades(request=request, db_session=db_session)

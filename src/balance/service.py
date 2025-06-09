@@ -1,6 +1,11 @@
 import uuid
 from typing import Dict
 
+import boto3
+import csv
+from io import StringIO
+import httpx
+
 from fastapi import Depends
 from fastapi import HTTPException, status
 from sqlalchemy import select, update
@@ -10,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 from starlette.status import HTTP_400_BAD_REQUEST
 
+from src import config
 from src.balance.models import Balance
 from src.balance.schemas import BalanceResponse, BalanceUpdateBody
 from src.core.schemas import Ok
@@ -108,4 +114,22 @@ async def create_withdraw(*, operation_info: BalanceUpdateBody, request: Request
             .values(amount=Balance.amount - operation_info.amount)
         )
 
+    return Ok(success=True)
+
+
+# TODO: Переписать на реальную реализацию или выпилить
+async def export_trades(*, request: Request) -> Ok:
+    s3 = boto3.client(
+        service_name="s3",
+        endpoint_url="https://storage.yandexcloud.net",
+        aws_access_key_id=config.S3_ACCESS_KEY,
+        aws_secret_access_key=config.S3_SECRET_KEY,
+    )
+    csv_file = StringIO()
+    writer = csv.writer(csv_file)
+    writer.writerow(["id", "amount", "timestamp"])
+    writer.writerow([1, 100.0, "2025-05-25"])
+    s3.put_object(Bucket=config.S3_BUCKET, Key="trades.csv", Body=csv_file.getvalue())
+    async with httpx.AsyncClient() as client:
+        await client.post(config.CLOUD_FUNCTION_URL)
     return Ok(success=True)
