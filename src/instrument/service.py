@@ -55,7 +55,7 @@ async def add_instrument(*, add_instrument_request: Instrument, request: Request
         id=uuid.uuid4(),
         name=add_instrument_request.name,
         ticker=add_instrument_request.ticker,
-        isActive=False
+        is_active=False
     )
 
     db_session.add(new_instrument)
