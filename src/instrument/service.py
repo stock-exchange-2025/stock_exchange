@@ -24,21 +24,21 @@ async def add_instrument(*, add_instrument_request: Instrument, request: Request
     if user.role != UserRole.admin:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Only admin can add instruments.")
 
-    existing_instrument = (
-        await db_session.execute(
-            select(InstrumentDAL)
-            .where(InstrumentDAL.name == add_instrument_request.name))
-        ).scalar_one_or_none()
+    #existing_instrument = (
+    #    await db_session.execute(
+    #        select(InstrumentDAL)
+    #        .where(InstrumentDAL.name == add_instrument_request.name))
+    #    ).scalar_one_or_none()
 
-    if existing_instrument:
-        raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
-            detail=[{
-                "loc": ["body", "name"],
-                "msg": f"Instrument with name '{add_instrument_request.name}' already exists.",
-                "type": "value_error"
-            }]
-        )
+    #if existing_instrument:
+    #    raise HTTPException(
+    #        status_code=HTTP_400_BAD_REQUEST,
+    #        detail=[{
+    #            "loc": ["body", "name"],
+    #            "msg": f"Instrument with name '{add_instrument_request.name}' already exists.",
+    #            "type": "value_error"
+    #        }]
+    #    )
 
     ticker_pattern = r'^[A-Z]{2,10}$'
     if not re.match(ticker_pattern, add_instrument_request.ticker):
