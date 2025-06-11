@@ -31,6 +31,12 @@ async def add_instrument(*, add_instrument_request: Instrument, request: Request
         )
 
     if existing_instrument is not None:
+        if not existing_instrument.is_active:
+            await db_session.execute(
+                update(InstrumentDAL)
+                .where(InstrumentDAL.id == existing_instrument.id)
+                .values(is_active=True)
+            )
         return Ok(success=True)
 
     #if existing_instrument:
