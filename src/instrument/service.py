@@ -25,10 +25,10 @@ async def add_instrument(*, add_instrument_request: Instrument, request: Request
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Only admin can add instruments.")
 
     existing_instrument = (
-        await db_session.execute(
+        await db_session.scalar(
             select(InstrumentDAL)
             .where(InstrumentDAL.name == add_instrument_request.name))
-        ).first()
+        )
 
     if existing_instrument is not None:
         return Ok(success=True)
@@ -87,11 +87,9 @@ async def delete_instrument(*, ticker: str, request: Request, db_session: AsyncS
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Only admin can add instruments.")
 
     async with db_session.begin():
-        existing_instrument = (
-            await db_session.execute(
-                select(InstrumentDAL).where(InstrumentDAL.ticker == ticker)
-            )
-        ).first()
+        existing_instrument = await db_session.scalar(
+            select(InstrumentDAL).where(InstrumentDAL.ticker == ticker)
+        )
 
         if existing_instrument is None:
             raise HTTPException(

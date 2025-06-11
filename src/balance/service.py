@@ -48,15 +48,13 @@ async def create_deposit(*, operation_info: BalanceUpdateBody, request: Request,
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Only admin can make deposit.")
 
     async with db_session.begin():
-        instrument_id = (
-            await db_session.execute(
-                select(Instrument.id)
-                .where(
-                    Instrument.ticker == operation_info.ticker,
-                    Instrument.is_active == True
-                )
+        instrument_id = await db_session.scalar(
+            select(Instrument.id)
+            .where(
+                Instrument.ticker == operation_info.ticker,
+                Instrument.is_active == True
             )
-        ).first()
+        )
 
         if instrument_id is None:
             raise HTTPException(
@@ -69,7 +67,8 @@ async def create_deposit(*, operation_info: BalanceUpdateBody, request: Request,
             .values(
                 user_id=operation_info.user_id,
                 instrument_id=instrument_id,
-                amount=operation_info.amount
+                amount=operation_info.amount,
+                locked_amount=0.0
             )
             .on_conflict_do_update(
                 index_elements=['user_id', 'instrument_id'],
