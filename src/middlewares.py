@@ -29,7 +29,7 @@ async def auth_user(request: Request, call_next: RequestResponseEndpoint):
             raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail=f"Authentication failed: {str(e)}.")
 
         if not user:
-            raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Invalid API key.")
+            raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Invalid API key 3.")
 
         request.state.user = user
         request.state.api_key = api_key
