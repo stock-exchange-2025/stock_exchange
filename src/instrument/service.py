@@ -24,11 +24,14 @@ async def add_instrument(*, add_instrument_request: Instrument, request: Request
     if user.role != UserRole.admin:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Only admin can add instruments.")
 
-    #existing_instrument = (
-    #    await db_session.execute(
-    #        select(InstrumentDAL)
-    #        .where(InstrumentDAL.name == add_instrument_request.name))
-    #    ).scalar_one_or_none()
+    existing_instrument = (
+        await db_session.execute(
+            select(InstrumentDAL)
+            .where(InstrumentDAL.name == add_instrument_request.name))
+        ).first()
+
+    if existing_instrument is None:
+        return Ok(success=True)
 
     #if existing_instrument:
     #    raise HTTPException(

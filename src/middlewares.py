@@ -49,7 +49,7 @@ async def catch_exception(request: Request, call_next: RequestResponseEndpoint) 
     except HTTPException as e:
         log.exception(e)
         response = JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=e.status_code,
             content={"detail": str(e)}
         )
     except ValueError as e:

@@ -48,17 +48,17 @@ async def create_deposit(*, operation_info: BalanceUpdateBody, request: Request,
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Only admin can make deposit.")
 
     async with db_session.begin():
-        try:
-            instrument_id = (
-                await db_session.execute(
-                    select(Instrument.id)
-                    .where(
-                        Instrument.ticker == operation_info.ticker,
-                        Instrument.is_active == True
-                    )
+        instrument_id = (
+            await db_session.execute(
+                select(Instrument.id)
+                .where(
+                    Instrument.ticker == operation_info.ticker,
+                    Instrument.is_active == True
                 )
-            ).scalar_one()
-        except NoResultFound:
+            )
+        ).first()
+
+        if instrument_id is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Instrument with ticker {operation_info.ticker} not found"
