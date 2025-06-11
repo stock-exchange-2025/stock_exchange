@@ -108,7 +108,7 @@ async def delete_instrument(*, ticker: str, request: Request, db_session: AsyncS
         await db_session.execute(
             update(InstrumentDAL)
             .where(InstrumentDAL.id == existing_instrument.id)
-            .values(isActive=False)
+            .values(is_active=False)
         )
 
     return Ok(success=True)
