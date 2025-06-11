@@ -27,7 +27,7 @@ async def add_instrument(*, add_instrument_request: Instrument, request: Request
     existing_instrument = (
         await db_session.scalar(
             select(InstrumentDAL)
-            .where(InstrumentDAL.name == add_instrument_request.name))
+            .where(InstrumentDAL.ticker == add_instrument_request.ticker))
         )
 
     if existing_instrument is not None:
