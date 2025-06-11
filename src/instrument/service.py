@@ -30,7 +30,7 @@ async def add_instrument(*, add_instrument_request: Instrument, request: Request
             .where(InstrumentDAL.name == add_instrument_request.name))
         ).first()
 
-    if existing_instrument is None:
+    if existing_instrument is not None:
         return Ok(success=True)
 
     #if existing_instrument:
