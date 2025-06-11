@@ -27,7 +27,7 @@ async def create_order(*, body: LimitOrderBody, request: Request, db_session: As
     instrument = await db_session.scalar(
         select(Instrument).where(Instrument.ticker == body.ticker)
     )
-    if instrument is None or instrument.delisted:
+    if instrument is None or not instrument.is_active:
         raise HTTPException(status_code=404, detail="Ticker not found or delisted")
 
     # Шаг 2: Получаем базовый инструмент (RUB)
