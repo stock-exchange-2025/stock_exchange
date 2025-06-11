@@ -24,51 +24,51 @@ async def add_instrument(*, add_instrument_request: Instrument, request: Request
     if user.role != UserRole.admin:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Only admin can add instruments.")
 
-    existing_instrument = (
-        await db_session.scalar(
-            select(InstrumentDAL)
-            .where(InstrumentDAL.ticker == add_instrument_request.ticker))
-        )
-
-    if existing_instrument is not None:
-        if not existing_instrument.is_active:
-            await db_session.execute(
-                update(InstrumentDAL)
-                .where(InstrumentDAL.id == existing_instrument.id)
-                .values(is_active=True)
+    async with db_session.begin():
+        existing_instrument = (
+            await db_session.scalar(
+                select(InstrumentDAL)
+                .where(InstrumentDAL.ticker == add_instrument_request.ticker))
             )
-        return Ok(success=True)
 
-    #if existing_instrument:
-    #    raise HTTPException(
-    #        status_code=HTTP_400_BAD_REQUEST,
-    #        detail=[{
-    #            "loc": ["body", "name"],
-    #            "msg": f"Instrument with name '{add_instrument_request.name}' already exists.",
-    #            "type": "value_error"
-    #        }]
-    #    )
+        if existing_instrument is not None:
+            if not existing_instrument.is_active:
+                await db_session.execute(
+                    update(InstrumentDAL)
+                    .where(InstrumentDAL.id == existing_instrument.id)
+                    .values(is_active=True)
+                )
+            return Ok(success=True)
 
-    ticker_pattern = r'^[A-Z]{2,10}$'
-    if not re.match(ticker_pattern, add_instrument_request.ticker):
-        raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
-            detail=[{
-                "loc": ["body", "ticker"],
-                "msg": "Ticker must be 2-10 uppercase letters",
-                "type": "value_error"
-            }]
+        #if existing_instrument:
+        #    raise HTTPException(
+        #        status_code=HTTP_400_BAD_REQUEST,
+        #        detail=[{
+        #            "loc": ["body", "name"],
+        #            "msg": f"Instrument with name '{add_instrument_request.name}' already exists.",
+        #            "type": "value_error"
+        #        }]
+        #    )
+
+        ticker_pattern = r'^[A-Z]{2,10}$'
+        if not re.match(ticker_pattern, add_instrument_request.ticker):
+            raise HTTPException(
+                status_code=HTTP_400_BAD_REQUEST,
+                detail=[{
+                    "loc": ["body", "ticker"],
+                    "msg": "Ticker must be 2-10 uppercase letters",
+                    "type": "value_error"
+                }]
+            )
+
+        new_instrument = InstrumentDAL(
+            id=uuid.uuid4(),
+            name=add_instrument_request.name,
+            ticker=add_instrument_request.ticker,
+            is_active=True
         )
 
-    new_instrument = InstrumentDAL(
-        id=uuid.uuid4(),
-        name=add_instrument_request.name,
-        ticker=add_instrument_request.ticker,
-        is_active=True
-    )
-
-    db_session.add(new_instrument)
-    await db_session.commit()
+        db_session.add(new_instrument)
 
     return Ok(success=True)
 
