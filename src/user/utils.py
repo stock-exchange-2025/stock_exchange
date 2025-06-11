@@ -46,7 +46,11 @@ async def get_user(api_key: str, db_session: AsyncSession) -> UserDAL:
     secret = get_secret_key()
     expected_sig = hmac.new(str(secret).encode(), key_id.encode(), hashlib.sha256).hexdigest()
 
+    logger.info(f"[DEBUG] Key ID: {key_id}")
+    logger.info(f"[DEBUG] Received signature: {signature}")
+    logger.info(f"[DEBUG] Expected signature: {expected_sig}")
+
     if not hmac.compare_digest(signature, expected_sig):
-        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail=f"Invalid API key 2. {key_id} {signature} {expected_sig}")
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail=f"Invalid API key 2.")
 
     return (await db_session.execute(select(UserDAL).filter_by(api_key=key_id))).scalar_one_or_none()
