@@ -91,7 +91,7 @@ async def delete_instrument(*, ticker: str, request: Request, db_session: AsyncS
             await db_session.execute(
                 select(InstrumentDAL).where(InstrumentDAL.ticker == ticker)
             )
-        ).scalar_one_or_none()
+        ).first()
 
         if existing_instrument is None:
             raise HTTPException(
